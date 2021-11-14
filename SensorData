@@ -1,0 +1,57 @@
+from sense_hat import SenseHat
+from time import time
+import datetime
+import requests
+
+sense = SenseHat()
+
+sense.clear()
+
+send = False
+interval = 60 # 1 minute
+prevSec = 0
+
+print("Send sensor data from Sense HAT to Google Sheets using Raspberry Pi")
+print()
+
+while True:
+    for event in sense.stick.get_events():
+        
+        if event.direction == "left":
+            send = False
+            sense.show_letter("0", text_colour=(100,0,0))
+            print("Stop!")
+            print()
+            
+        if event.direction == "right":
+            send = True
+            sense.show_letter("1", text_colour=(0,100,0))
+            print("Sending data…")
+            print()
+    
+    if send == True:
+
+
+
+
+            prevSec = time()
+            
+            data_to_send = {}
+            data_to_send["date"] = str(datetime.datetime.now())
+            data_to_send["temperature"] = sense.get_temperature()
+            data_to_send["humidity"] = sense.get_humidity()
+            data_to_send["pressure"] = sense.get_pressure()
+            data_to_send["accelerometer"] = sense.get_accelerometer_raw()
+            data_to_send["gyroscope"] = sense.get_gyroscope_raw()
+            data_to_send["magnetometer"] = sense.get_compass()
+
+            print("JSON data:")
+            print(data_to_send)
+
+            # Replace your webhook URL here 
+            r = requests.post("URL", json = data_to_send)
+
+            print(r.status_code)
+            print()
+            
+            #Reference: https://tutorial.cytron.io/2020/10/06/log-sensor-data-from-sense-hat-to-google-sheets-using-raspberry-pi/
